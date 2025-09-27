@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Removed Tailwind directives since not using Tailwind CSS build process */
+
 
 /* Global styles */
 body {

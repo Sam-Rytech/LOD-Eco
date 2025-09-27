@@ -1,5 +1,5 @@
 import './globals.css'
-import React from 'react'
+import { Providers } from './providers'
 import WalletRoot from '../components/wallet/WalletRoot'
 
 export const metadata = {
@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <WalletRoot>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <header className="bg-white shadow">
               <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -19,7 +19,8 @@ export default function RootLayout({ children }) {
                   <img src="/logo.svg" alt="logo" className="w-10 h-10" />
                   <h1 className="text-lg font-semibold">LOD DApp</h1>
                 </div>
-                <div>{/* Connect UI is rendered inside WalletRoot */}</div>
+                {/* Wallet UI goes here */}
+                <WalletRoot />
               </div>
             </header>
 
@@ -33,7 +34,7 @@ export default function RootLayout({ children }) {
               </div>
             </footer>
           </div>
-        </WalletRoot>
+        </Providers>
       </body>
     </html>
   )
