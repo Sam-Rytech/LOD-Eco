@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import ConnectButton from '../../components/wallet/ConnectButton'
+import ConnectButton from '../components/wallet/ConnectButton'
 
 export default function HomePage() {
   return (
