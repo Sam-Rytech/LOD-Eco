@@ -1,50 +1,39 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
-import { appKit } from '../lib/wallet'
-import { getContracts, getSigner } from '../lib/contract'
+
+import { useState } from 'react'
+import { walletManager } from '../lib/BaseWalletManager'
+import { FAUCET_CONTRACT_ADDRESS } from '../lib/constants'
+import faucetABI from '../abi/FaucetLOD.json'
 
 export default function FaucetForm() {
-  const [user, setUser] = useState(null)
-  const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    const sub = appKit.subscribe(({ address }) => {
-      setUser(address ?? null)
-    })
-    return () => sub?.unsubscribe()
-  }, [])
-
-  async function handleClaim() {
-    if (!user) return alert('Connect wallet first')
-    setBusy(true)
+  const handleClaim = async () => {
+    setLoading(true)
+    setMessage('Processing...')
     try {
-      const signer = await getSigner()
-      const { faucet } = getContracts(signer) // faucet must be added to contract.js if ABI available
-      const tx = await faucet.claim()
-      await tx.wait()
-      alert('Faucet tokens claimed!')
-    } catch (e) {
-      console.error(e)
-      alert('Faucet claim failed')
+      walletManager.initializeContract(FAUCET_CONTRACT_ADDRESS, faucetABI)
+      const tx = await walletManager.writeContract('claim')
+      setMessage(`Claim successful! Tx: ${tx.hash}`)
+    } catch (err) {
+      console.error(err)
+      setMessage('Error claiming tokens')
     } finally {
-      setBusy(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="p-6 bg-gray-800 rounded-md text-white">
-      <h3 className="text-xl font-semibold mb-4">Claim LOD from Faucet</h3>
-      <p className="mb-4">
-        Get free test LOD tokens to use in staking and exploring the ecosystem.
-      </p>
+    <div className="bg-white shadow rounded p-4 space-y-4">
       <button
         onClick={handleClaim}
-        disabled={busy}
-        className="px-4 py-2 bg-yellow-500 rounded hover:bg-yellow-600"
+        disabled={loading}
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
       >
-        {busy ? 'Claiming...' : 'Claim Tokens'}
+        {loading ? 'Claiming...' : 'Claim LOD'}
       </button>
+      {message && <p className="text-gray-700">{message}</p>}
     </div>
   )
 }
