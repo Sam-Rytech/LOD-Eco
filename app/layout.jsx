@@ -1,17 +1,18 @@
-import './globals.css'
-import Navbar from '../components/Navbar'
+'use client'
 
-export const metadata = {
-  title: 'Lonrad (LOD) Ecosystem',
-  description: 'Stake and earn rewards with Lonrad Token',
-}
+import './globals.css'
+import { AppKitProvider } from '@reown/appkit/react'
+import { appKit } from '../lib/wallet'
+import Navbar from '../components/Navbar'
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        {children}
+        <AppKitProvider appKit={appKit}>
+          <Navbar />
+          <main>{children}</main>
+        </AppKitProvider>
       </body>
     </html>
   )
