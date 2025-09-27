@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Global styles */
+body {
+  background-color: #1a202c; /* Tailwind bg-gray-900 */
+  color: #ffffff; /* Tailwind text-white */
+}
+
+a {
+  color: #60a5fa; /* Tailwind text-blue-400 */
+  transition: color 0.2s;
+}
+a:hover {
+  color: #3b82f6; /* Tailwind text-blue-500 */
+}
