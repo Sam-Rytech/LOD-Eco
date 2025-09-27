@@ -1,32 +1,38 @@
 'use client'
-import Link from 'next/link'
+
+import { useEffect, useState } from 'react'
+import { walletManager } from '../lib/BaseWalletManager'
 import ConnectButton from '../components/ConnectButton'
+import { STAKING_CONTRACT_ADDRESS, LOD_TOKEN_ADDRESS } from '../lib/constants'
+import stakingABI from '../abi/LODStaking.json'
 
 export default function HomePage() {
+  const [totalStaked, setTotalStaked] = useState('0')
+
+  useEffect(() => {
+    async function fetchTotalStaked() {
+      try {
+        walletManager.initializeContract(STAKING_CONTRACT_ADDRESS, stakingABI)
+        const total = await walletManager.readContract('totalStaked')
+        setTotalStaked(total.toString())
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchTotalStaked()
+  }, [])
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-      <h1 className="text-4xl font-bold mb-4">Welcome to Lonrad (LOD)</h1>
-      <p className="mb-6 max-w-2xl">
-        Lonrad Token (LOD) powers our staking and faucet ecosystem. Stake LOD to
-        earn fixed APR rewards or claim tokens from the faucet to get started.
-      </p>
-
-      <div className="flex gap-4 mb-6">
-        <Link
-          href="/stake"
-          className="px-6 py-3 bg-green-600 rounded hover:bg-green-700"
-        >
-          Go to Staking
-        </Link>
-        <Link
-          href="/faucet"
-          className="px-6 py-3 bg-yellow-500 rounded hover:bg-yellow-600"
-        >
-          Go to Faucet
-        </Link>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Lonrad Ecosystem (LOD)</h1>
+        <ConnectButton />
       </div>
-
-      <ConnectButton />
-    </main>
+      <div className="bg-white shadow rounded p-4">
+        <h2 className="text-xl font-semibold mb-2">Total Staked LOD</h2>
+        <p className="text-gray-700">{totalStaked}</p>
+      </div>
+    </div>
   )
 }
