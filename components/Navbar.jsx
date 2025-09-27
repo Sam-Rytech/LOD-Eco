@@ -1,23 +1,23 @@
 'use client'
-import Link from 'next/link'
+
 import ConnectButton from './ConnectButton'
 
 export default function Navbar() {
   return (
-    <header className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-      <div className="text-xl font-bold">Lonrad</div>
-      <nav className="flex gap-4">
-        <Link href="/" className="hover:text-blue-400">
+    <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
+      <div className="font-bold text-lg">Lonrad</div>
+      <div className="flex space-x-4">
+        <a href="/" className="hover:underline">
           Home
-        </Link>
-        <Link href="/stake" className="hover:text-blue-400">
+        </a>
+        <a href="/stake" className="hover:underline">
           Stake
-        </Link>
-        <Link href="/faucet" className="hover:text-blue-400">
+        </a>
+        <a href="/faucet" className="hover:underline">
           Faucet
-        </Link>
-      </nav>
-      <ConnectButton />
-    </header>
+        </a>
+        <ConnectButton />
+      </div>
+    </nav>
   )
 }
