@@ -1,17 +1,27 @@
 'use client'
 
-import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
+import { useState } from 'react'
+import { walletManager } from '../lib/BaseWalletManager'
 
 export default function ConnectButton() {
-  const { open } = useAppKit()
-  const { address, isConnected } = useAppKitAccount()
+  const [address, setAddress] = useState(null)
+
+  const handleConnect = async () => {
+    try {
+      await walletManager.openModal()
+      const account = await walletManager.getAccount()
+      if (account.isConnected) setAddress(account.address)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   return (
     <button
-      onClick={() => open()}
-      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      onClick={handleConnect}
+      className="px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-100 font-semibold"
     >
-      {isConnected && address
+      {address
         ? `${address.slice(0, 6)}...${address.slice(-4)}`
         : 'Connect Wallet'}
     </button>
