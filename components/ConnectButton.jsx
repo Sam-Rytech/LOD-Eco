@@ -1,10 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
-import {
-  useAppKit,
-  useAppKitAccount,
-  useAppKitProvider,
-} from '@reown/appkit/react'
+
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
 
 export default function ConnectButton() {
   const { open } = useAppKit()

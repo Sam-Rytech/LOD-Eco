@@ -9,9 +9,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        {/* Wrap app with AppKitProvider so hooks work */}
         <AppKitProvider appKit={appKit}>
           <Navbar />
-          <main>{children}</main>
+          <main className="p-4">{children}</main>
         </AppKitProvider>
       </body>
     </html>
