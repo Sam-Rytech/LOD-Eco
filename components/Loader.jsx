@@ -1,9 +1,9 @@
+'use client'
+
 export default function Loader() {
   return (
-    <div className="flex items-center justify-center space-x-2">
-      <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-      <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce delay-150"></div>
-      <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce delay-300"></div>
+    <div className="flex justify-center items-center py-4">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
   )
 }
