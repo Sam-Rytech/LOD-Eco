@@ -1,18 +1,24 @@
 'use client'
-import StakeForm from '@/components/StakeForm'
-import ConnectButton from '../../components/ConnectButton'
+import React from 'react'
+import StakeForm from '../../components/staking/StakeForm'
+import UnstakeForm from '../../components/staking/UnstakeForm'
+import RewardsDisplay from '../../components/staking/RewardsDisplay'
 
-export default function FaucetPage() {
+export default function StakePage() {
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-8">
-      <nav className="flex justify-between items-center mb-8">
-        <div className="text-2xl font-bold">Stake LOD</div>
-        <ConnectButton />
-      </nav>
-
-      <section className="max-w-2xl mx-auto">
-        <StakeForm />
-      </section>
-    </main>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">Staking</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded shadow">
+          <StakeForm />
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <UnstakeForm />
+          <div className="mt-4">
+            <RewardsDisplay />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
