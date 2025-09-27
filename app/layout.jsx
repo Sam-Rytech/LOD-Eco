@@ -1,19 +1,39 @@
 'use client'
 
-import { useEffect } from 'react'
+import './globals.css'
+import { AppKitProvider } from '@reown/appkit/react'
+import BaseWalletManager from '../lib/BaseWalletManager' // Import the class
 import Navbar from '../components/Navbar'
-import { walletManager } from '../lib/BaseWalletManager'
+import { useEffect, useState } from 'react'
+
+// Create an instance
+const walletManager = new BaseWalletManager()
 
 export default function RootLayout({ children }) {
+  const [appKitReady, setAppKitReady] = useState(false)
+
   useEffect(() => {
-    walletManager.initializeAppKit()
+    async function initWallet() {
+      try {
+        await walletManager.initializeAppKit() // now works on the instance
+        setAppKitReady(true)
+      } catch (err) {
+        console.error('Failed to initialize AppKit', err)
+      }
+    }
+
+    initWallet()
   }, [])
+
+  if (!appKitReady) return <div>Loading wallet...</div>
 
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-6">{children}</main>
+      <body>
+        <AppKitProvider appKit={walletManager.appKit}>
+          <Navbar />
+          <main>{children}</main>
+        </AppKitProvider>
       </body>
     </html>
   )
