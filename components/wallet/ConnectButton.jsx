@@ -1,12 +1,10 @@
 'use client'
 import React from 'react'
-import { ConnectButton as ReownConnect } from '@reown/appkit/react'
 
-export default function ConnectButton() {
-  // Reown AppKit's ConnectButton handles wallet selection (WalletConnect, MetaMask, etc.)
+export default function WalletConnectButton() {
   return (
     <div>
-      <ReownConnect />
+      <w3m-button />
     </div>
   )
 }
