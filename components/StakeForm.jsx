@@ -1,67 +1,46 @@
+// components/StakeForm.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
 import {
-  stakeTokens,
-  withdrawTokens,
-  withdrawAllTokens,
+  stake,
+  withdraw,
   claimRewards,
-  getPendingRewards,
-  getUserStake,
-  getAPR,
-} from '@/lib/contracts/staking';
-import { getBalance, getAllowance, approve, getDecimals } from '@/lib/contracts/token';
-import { ethers } from 'ethers';
+  pendingRewards,
+} from '../lib/contracts/staking';
+import { useAppKit } from '@reown/appkit/react';
 
 export default function StakeForm() {
-  const { address, isConnected } = useAccount();
-  const [stakeAmount, setStakeAmount] = useState('');
-  const [balance, setBalance] = useState(0);
-  const [staked, setStaked] = useState(0);
-  const [rewards, setRewards] = useState(0);
-  const [apr, setApr] = useState(0);
-  const [decimals, setDecimals] = useState(18);
+  const { address, isConnected } = useAppKit();
+  const [amount, setAmount] = useState('');
+  const [rewards, setRewards] = useState('0');
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    async function loadData() {
-      if (!address) return;
-      try {
-        const [bal, stakeInfo, reward, aprVal, dec] = await Promise.all([
-          getBalance(address),
-          getUserStake(address),
-          getPendingRewards(address),
-          getAPR(),
-          getDecimals(),
-        ]);
-        setBalance(bal);
-        setStaked(stakeInfo.amount);
-        setRewards(reward);
-        setApr(Number(aprVal) / 100); // APR in %
-        setDecimals(Number(dec));
-      } catch (err) {
-        console.error(err);
-      }
+    if (isConnected && address) {
+      loadRewards();
     }
-    loadData();
-  }, [address]);
+  }, [isConnected, address]);
+
+  const loadRewards = async () => {
+    try {
+      const res = await pendingRewards(address);
+      setRewards(res.toString());
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleStake = async () => {
     try {
       setLoading(true);
-      const amount = ethers.parseUnits(stakeAmount, decimals);
-      // Check allowance
-      const allowance = await getAllowance(address, process.env.NEXT_PUBLIC_STAKING_ADDRESS);
-      if (allowance < amount) {
-        const txApprove = await approve(process.env.NEXT_PUBLIC_STAKING_ADDRESS, amount);
-        await txApprove;
-      }
-      const tx = await stakeTokens(amount);
-      await tx;
+      setMessage('');
+      const tx = await stake(amount);
+      setMessage(`Staked! Tx hash: ${tx.hash}`);
+      await loadRewards();
     } catch (err) {
-      console.error(err);
-      alert(err.message || 'Stake failed');
+      setMessage(err.message || 'Stake failed');
     } finally {
       setLoading(false);
     }
@@ -70,95 +49,72 @@ export default function StakeForm() {
   const handleWithdraw = async () => {
     try {
       setLoading(true);
-      const amount = ethers.parseUnits(stakeAmount, decimals);
-      const tx = await withdrawTokens(amount);
-      await tx;
+      setMessage('');
+      const tx = await withdraw(amount);
+      setMessage(`Withdrawn! Tx hash: ${tx.hash}`);
+      await loadRewards();
     } catch (err) {
-      console.error(err);
-      alert(err.message || 'Withdraw failed');
+      setMessage(err.message || 'Withdraw failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleWithdrawAll = async () => {
+  const handleClaim = async () => {
     try {
       setLoading(true);
-      const tx = await withdrawAllTokens();
-      await tx;
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Withdraw all failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleClaimRewards = async () => {
-    try {
-      setLoading(true);
+      setMessage('');
       const tx = await claimRewards();
-      await tx;
+      setMessage(`Rewards claimed! Tx hash: ${tx.hash}`);
+      await loadRewards();
     } catch (err) {
-      console.error(err);
-      alert(err.message || 'Claim rewards failed');
+      setMessage(err.message || 'Claim failed');
     } finally {
       setLoading(false);
     }
   };
-
-  if (!isConnected) {
-    return <p className="text-center text-gray-400">Connect wallet to stake</p>;
-  }
 
   return (
-    <div className="max-w-md p-6 mx-auto bg-white shadow-md rounded-2xl">
-      <h2 className="mb-4 text-xl font-semibold">Staking</h2>
-      <p className="mb-2">Your balance: {ethers.formatUnits(balance, decimals)} LOD</p>
-      <p className="mb-2">Staked: {ethers.formatUnits(staked, decimals)} LOD</p>
-      <p className="mb-2">Rewards: {ethers.formatUnits(rewards, decimals)} LOD</p>
-      <p className="mb-2">APR: {apr}%</p>
-
+    <div className="flex flex-col gap-4">
       <input
         type="number"
-        value={stakeAmount}
-        onChange={(e) => setStakeAmount(e.target.value)}
-        className="w-full px-3 py-2 mb-3 border rounded-lg"
-        placeholder="Amount to stake/withdraw"
+        placeholder="Amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <div className="grid grid-cols-2 gap-2 mb-2">
+      <div className="flex gap-3">
         <button
-          className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
-          disabled={loading}
           onClick={handleStake}
+          disabled={loading || !amount}
+          className="flex-1 px-4 py-2 font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-50"
         >
-          Stake
+          {loading ? 'Processing...' : 'Stake'}
         </button>
+
         <button
-          className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-gray-400"
-          disabled={loading}
           onClick={handleWithdraw}
+          disabled={loading || !amount}
+          className="flex-1 px-4 py-2 font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-50"
         >
-          Withdraw
+          {loading ? 'Processing...' : 'Withdraw'}
         </button>
       </div>
 
       <button
-        className="w-full px-4 py-2 mb-2 text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
+        onClick={handleClaim}
         disabled={loading}
-        onClick={handleWithdrawAll}
+        className="px-4 py-2 font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50"
       >
-        Withdraw All
+        {loading ? 'Processing...' : 'Claim Rewards'}
       </button>
 
-      <button
-        className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-        disabled={loading}
-        onClick={handleClaimRewards}
-      >
-        Claim Rewards
-      </button>
+      <p className="text-sm text-gray-700">Pending Rewards: {rewards}</p>
+
+      {message && (
+        <p className="text-sm text-center text-gray-600 break-all">{message}</p>
+      )}
     </div>
   );
 }
